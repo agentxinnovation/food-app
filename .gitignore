@@ -1,0 +1,8 @@
+.env
+node_modules/
+backend/users.json
+backend/menu.json
+backend/orders.json
+backend/old/users.json
+backend/old/menu.json
+backend/old/orders.json
