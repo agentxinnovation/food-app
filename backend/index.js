@@ -15,7 +15,7 @@ app.use(cors(
 // Middleware to parse JSON request bodies
 app.use(express.json());
 
-const port = parseInt(process.env.PORT) || process.argv[3] || 8080;
+const port = parseInt(process.env.PORT) || process.argv[3] || 8081;
 
 // JWT Secret (in production, use environment variable)
 const JWT_SECRET = 'your-secret-key-change-this-in-production';
