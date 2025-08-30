@@ -47,11 +47,8 @@ export default function CartScreen() {
         <View className="p-4">
           {cartItems.map((item, index) => (
             <CartItem
-              key={`${item.menuItem.id}-${index}`}
+              key={`${item.menuItem.id}-${index}`} // Use unique key
               item={item}
-              onIncrement={() => console.log('Increment')} // Will be implemented with cart actions
-              onDecrement={() => console.log('Decrement')} // Will be implemented with cart actions
-              onRemove={() => console.log('Remove')} // Will be implemented with cart actions
             />
           ))}
         </View>

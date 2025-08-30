@@ -5,7 +5,7 @@ import { MenuItem } from '../types/product';
 import { User } from '../types/user';
 import { storage } from './storage';
 
-const BASE_URL = 'https://food.loca.lt';
+const BASE_URL = 'http://131.153.22.191:8081';
 
 class ApiService {
   private async makeRequest<T>(

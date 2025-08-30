@@ -9,7 +9,7 @@ export class AuthService {
       console.log('Attempting login with:', credentials.email);
       
       // Make raw fetch request to avoid API service issues
-      const response = await fetch('https://food.loca.lt/auth/login', {
+      const response = await fetch('http://131.153.22.191:8081/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export class AuthService {
     try {
       console.log('Attempting registration with:', userData.email);
       
-      const response = await fetch('https://food.loca.lt/auth/register', {
+      const response = await fetch('http://131.153.22.191:8081/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ export class AuthService {
       }
 
       // Use raw fetch to avoid circular issues
-      const response = await fetch('https://food.loca.lt/auth/profile', {
+      const response = await fetch('http://131.153.22.191:8081/auth/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -193,7 +193,7 @@ export class AuthService {
       const token = await storage.getToken();
       if (!token) throw new Error('No authentication token');
 
-      const response = await fetch('https://food.loca.lt/auth/update', {
+      const response = await fetch('http://131.153.22.191:8081/auth/update', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

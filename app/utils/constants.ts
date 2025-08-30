@@ -1,6 +1,6 @@
 // utils/constants.ts
 export const API_CONFIG = {
-    BASE_URL: 'https://food.loca.lt',
+    BASE_URL: 'http://131.153.22.191:8081',
     TIMEOUT: 10000,
     RETRY_ATTEMPTS: 3,
   } as const;

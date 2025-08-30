@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { api } from '../../services/api';
 import { MenuItem } from '../../types/product';
+import { addToCart } from '../../store/cartSlice';
 import Header from '../../components/common/Header';
 import SearchBar from '../../components/common/SearchBar';
 import CategoryTabs from '../../components/product/CategoryTabs';
@@ -15,6 +16,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const cartItems = useAppSelector((state) => state.cart.items);
   
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<MenuItem[]>([]);
@@ -92,8 +94,25 @@ export default function HomeScreen() {
   };
 
   const handleAddToCart = (product: MenuItem) => {
-    // This will be handled in the product detail screen
-    router.push(`/product/${product.id}`);
+    // Actually add to cart instead of redirecting
+    dispatch(addToCart({
+      menuItem: product,
+      quantity: 1,
+      customizations: {
+        spiceLevel: 'MEDIUM',
+        extras: []
+      }
+    }));
+    
+    // Optional: Show a toast or confirmation message
+    console.log('Added to cart:', product.name);
+  };
+
+  const getCartQuantity = (product: MenuItem) => {
+    const cartItem = cartItems.find(item => 
+      item.menuItem.id === product.id
+    );
+    return cartItem ? cartItem.quantity : 0;
   };
 
   const handleRefresh = () => {
@@ -147,6 +166,7 @@ export default function HomeScreen() {
           products={filteredProducts}
           onProductPress={handleProductPress}
           onAddToCart={handleAddToCart}
+          cartItems={cartItems}
           loading={isLoading}
         />
 

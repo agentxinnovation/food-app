@@ -121,7 +121,7 @@ export const calculateTotalAmount = (
 export const getImageUri = (imagePath: string): string => {
   if (!imagePath) return '';
   if (imagePath.startsWith('http')) return imagePath;
-  return `https://food.loca.lt/uploads/${imagePath}`;
+  return `http://131.153.22.191:8081/uploads/${imagePath}`;
 };
 
 export const getPlaceholderImage = (type: 'food' | 'user' | 'empty' = 'food'): string => {

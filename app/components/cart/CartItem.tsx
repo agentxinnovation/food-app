@@ -1,23 +1,40 @@
 // components/cart/CartItem.tsx
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useAppDispatch } from '../../hooks/redux';
 import { CartItem as CartItemType } from '../../types/product';
 import { formatCurrency } from '../../utils/helpers';
+import { incrementQuantity, decrementQuantity, removeFromCart } from '../../store/cartSlice';
 import Button from '../ui/Button';
 
 interface CartItemProps {
   item: CartItemType;
-  onIncrement: () => void;
-  onDecrement: () => void;
-  onRemove: () => void;
 }
 
-const CartItem: React.FC<CartItemProps> = ({
-  item,
-  onIncrement,
-  onDecrement,
-  onRemove,
-}) => {
+const CartItem: React.FC<CartItemProps> = ({ item }) => {
+  const dispatch = useAppDispatch();
+
+  const handleIncrement = () => {
+    dispatch(incrementQuantity({
+      menuItemId: item.menuItem.id,
+      customizations: item.customizations
+    }));
+  };
+
+  const handleDecrement = () => {
+    dispatch(decrementQuantity({
+      menuItemId: item.menuItem.id,
+      customizations: item.customizations
+    }));
+  };
+
+  const handleRemove = () => {
+    dispatch(removeFromCart({
+      menuItemId: item.menuItem.id,
+      customizations: item.customizations
+    }));
+  };
+
   return (
     <View style={styles.container}>
       <Image
@@ -52,7 +69,7 @@ const CartItem: React.FC<CartItemProps> = ({
         <View style={styles.quantityContainer}>
           <TouchableOpacity 
             style={styles.quantityButton}
-            onPress={onDecrement}
+            onPress={handleDecrement}
           >
             <Text style={styles.quantityButtonText}>−</Text>
           </TouchableOpacity>
@@ -61,7 +78,7 @@ const CartItem: React.FC<CartItemProps> = ({
           
           <TouchableOpacity 
             style={styles.quantityButton}
-            onPress={onIncrement}
+            onPress={handleIncrement}
           >
             <Text style={styles.quantityButtonText}>+</Text>
           </TouchableOpacity>
@@ -71,7 +88,7 @@ const CartItem: React.FC<CartItemProps> = ({
           title="Remove"
           variant="danger"
           size="small"
-          onPress={onRemove}
+          onPress={handleRemove}
           style={styles.removeButton}
         />
       </View>

@@ -1,13 +1,13 @@
-// components/product/ProductGrid.tsx
 import React from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
-import { MenuItem } from '../../types/product';
+import { FlatList, View } from 'react-native';
+import { MenuItem, CartItem } from '../../types/product';
 import ProductCard from './ProductCard';
 
 interface ProductGridProps {
   products: MenuItem[];
   onProductPress: (product: MenuItem) => void;
   onAddToCart: (product: MenuItem) => void;
+  cartItems: CartItem[];
   loading?: boolean;
 }
 
@@ -15,6 +15,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   products,
   onProductPress,
   onAddToCart,
+  cartItems,
   loading = false,
 }) => {
   // Create unique keys by combining itemId and index
@@ -22,19 +23,28 @@ const ProductGrid: React.FC<ProductGridProps> = ({
     return `${item.id}-${index}`;
   };
 
-  const renderItem = ({ item, index }: { item: MenuItem; index: number }) => (
-    <View style={styles.itemContainer}>
+  // Get quantity for each product
+  const getProductQuantity = (product: MenuItem) => {
+    const cartItem = cartItems.find(item => 
+      item.menuItem.id === product.id
+    );
+    return cartItem ? cartItem.quantity : 0;
+  };
+
+  const renderItem = ({ item }: { item: MenuItem }) => (
+    <View className="flex-1 max-w-[48%] mx-1">
       <ProductCard
         item={item}
         onPress={() => onProductPress(item)}
         onAddToCart={() => onAddToCart(item)}
+        cartQuantity={getProductQuantity(item)}
       />
     </View>
   );
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View className="p-4 items-center">
         {/* Loading skeleton or spinner */}
       </View>
     );
@@ -44,32 +54,13 @@ const ProductGrid: React.FC<ProductGridProps> = ({
     <FlatList
       data={products}
       renderItem={renderItem}
-      keyExtractor={keyExtractor} // Use the custom key extractor
+      keyExtractor={keyExtractor}
       numColumns={2}
-      contentContainerStyle={styles.container}
-      columnWrapperStyle={styles.columnWrapper}
+      contentContainerStyle={{ padding: 8 }}
+      columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 16 }}
       showsVerticalScrollIndicator={false}
     />
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 8,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  itemContainer: {
-    flex: 1,
-    maxWidth: '48%',
-    marginHorizontal: 4,
-  },
-  loadingContainer: {
-    padding: 16,
-    alignItems: 'center',
-  },
-});
 
 export default ProductGrid;
