@@ -1,6 +1,7 @@
 // types/product.ts
 export interface MenuItem {
   id: string;
+  itemId: string;
   name: string;
   description: string;
   price: number;

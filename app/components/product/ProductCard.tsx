@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { MenuItem } from '../../types/product';
 import { formatCurrency } from '../../utils/helpers';
 import Card from '../ui/Card';
@@ -20,70 +20,55 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   return (
     <Card variant="elevated" padding="none" onPress={onPress}>
-      <View className="relative">
+      <View style={styles.container}>
         {/* Product Image */}
         <Image
           source={{ 
             uri: item.image || 'https://via.placeholder.com/200x150/E5E5E5/999999?text=Food+Image'
           }}
-          className="w-full h-[150px] rounded-t-xl"
+          style={styles.image}
           resizeMode="cover"
         />
         
-        {/* Availability Badge */}
-        {!item.isAvailable && (
-          <View className="absolute top-2 left-2 bg-red-500/90 px-2 py-1 rounded">
-            <Text className="text-white text-xs font-semibold">Out of Stock</Text>
-          </View>
-        )}
-        
-        {/* Vegetarian Badge */}
-        <View className={`absolute top-2 right-2 w-6 h-6 rounded bg-white justify-center items-center border ${item.isVegetarian ? 'border-green-500' : 'border-red-500'}`}>
-          <Text className={`text-xs ${item.isVegetarian ? 'text-green-500' : 'text-green-500'}`}>●</Text>
-        </View>
-        
         {/* Content */}
-        <View className="p-3">
-          <Text className="text-base font-semibold text-gray-900 mb-1" numberOfLines={2}>{item.name}</Text>
-          <Text className="text-sm text-gray-500 mb-2 leading-5" numberOfLines={2}>{item.description}</Text>
+        <View style={styles.content}>
+          <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
+          <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
           
-          {/* Price and Rating */}
-          <View className="flex-row justify-between items-center mb-1.5">
-            <Text className="text-lg font-bold text-blue-500">{formatCurrency(item.price)}</Text>
-            {item.rating && (
-              <View className="flex-row items-center">
-                <Text className="text-xs text-gray-500">⭐ {item.rating.toFixed(1)}</Text>
-              </View>
-            )}
+          {/* Price and Preparation Time */}
+          <View style={styles.details}>
+            <Text style={styles.price}>{formatCurrency(item.price)}</Text>
+            <Text style={styles.prepTime}>🕒 {item.preparationTime} mins</Text>
           </View>
-          
-          {/* Preparation Time */}
-          <Text className="text-xs text-gray-500 mb-3">🕒 {item.preparationTime} mins</Text>
           
           {/* Add to Cart Button */}
-          <View className="items-center">
+          <View style={styles.buttonContainer}>
             {cartQuantity > 0 ? (
-              <View className="flex-row items-center bg-blue-500 rounded-md py-2 px-4">
-                <TouchableOpacity 
-                  className="w-[30px] h-[30px] rounded-full bg-white/20 justify-center items-center"
-                  onPress={() => console.log('Decrement')}
-                >
-                  <Text className="text-white text-lg font-semibold">−</Text>
+              <View style={styles.quantityContainer}>
+                <TouchableOpacity style={styles.quantityButton}>
+                  <Text style={styles.quantityButtonText}>−</Text>
                 </TouchableOpacity>
-                <Text className="mx-4 text-base font-semibold text-white min-w-[20px] text-center">{cartQuantity}</Text>
+                <Text style={styles.quantity}>{cartQuantity}</Text>
                 <TouchableOpacity 
-                  className="w-[30px] h-[30px] rounded-full bg-white/20 justify-center items-center"
-                  onPress={onAddToCart}
+                  style={styles.quantityButton}
+                  onPress={(e:any) => {
+                    e.stopPropagation(); // Prevent card press
+                    onAddToCart();
+                  }}
                 >
-                  <Text className="text-white text-lg font-semibold">+</Text>
+                  <Text style={styles.quantityButtonText}>+</Text>
                 </TouchableOpacity>
               </View>
             ) : (
               <Button
                 title="Add to Cart"
-                onPress={onAddToCart}
+                onPress={(e:any) => {
+                  e.stopPropagation(); // Prevent card press
+                  onAddToCart();
+                }}
                 size="small"
                 disabled={!item.isAvailable}
+                style={styles.addButton}
               />
             )}
           </View>
@@ -92,5 +77,82 @@ const ProductCard: React.FC<ProductCardProps> = ({
     </Card>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+  },
+  image: {
+    width: '100%',
+    height: 150,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  content: {
+    padding: 12,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1D1D1F',
+    marginBottom: 4,
+  },
+  description: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginBottom: 8,
+    lineHeight: 18,
+  },
+  details: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  price: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#007AFF',
+  },
+  prepTime: {
+    fontSize: 12,
+    color: '#8E8E93',
+  },
+  buttonContainer: {
+    alignItems: 'center',
+  },
+  addButton: {
+    width: '100%',
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#007AFF',
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  quantityButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quantityButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  quantity: {
+    marginHorizontal: 16,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    minWidth: 20,
+    textAlign: 'center',
+  },
+});
 
 export default ProductCard;

@@ -1,4 +1,3 @@
-// store/cartSlice.ts
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { CartState, CartItem, MenuItem } from '../types/product';
 import { storage } from '../services/storage';
@@ -29,7 +28,7 @@ const calculateCartTotals = (items: CartItem[]) => {
 const findCartItem = (items: CartItem[], menuItemId: string, customizations?: any) => {
   return items.findIndex(
     item =>
-      item.menuItem.id === menuItemId &&
+      item.menuItem.itemId === menuItemId &&
       JSON.stringify(item.customizations) === JSON.stringify(customizations)
   );
 };
@@ -58,35 +57,39 @@ const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addToCart: (state, action: PayloadAction<{
-      menuItem: MenuItem;
-      quantity: number;
-      customizations?: {
-        spiceLevel?: 'MILD' | 'MEDIUM' | 'HOT';
-        extras?: string[];
-        notes?: string;
-      };
-    }>) => {
+    addToCart: (state, action) => {
       const { menuItem, quantity, customizations } = action.payload;
-
-      const existingItemIndex = findCartItem(state.items, menuItem.id, customizations);
-
+      
+      // Create a new array to avoid mutation
+      const newItems = [...state.items];
+      
+      const existingItemIndex = findCartItem(newItems, menuItem.itemId, customizations);
+    
       if (existingItemIndex >= 0) {
-        const existingItem = state.items[existingItemIndex];
+        // Update existing item
+        const existingItem = newItems[existingItemIndex];
         const newQuantity = existingItem.quantity + quantity;
         const newCartItem = createCartItem(menuItem, newQuantity, customizations);
-        state.items[existingItemIndex] = newCartItem;
+        
+        newItems[existingItemIndex] = newCartItem;
       } else {
+        // Add new item
         const newCartItem = createCartItem(menuItem, quantity, customizations);
-        state.items.push(newCartItem);
+        newItems.push(newCartItem);
       }
-
-      const totals = calculateCartTotals(state.items);
+    
+      // Return new state
+      state.items = newItems;
+      
+      // Recalculate totals
+      const totals = calculateCartTotals(newItems);
       state.totalItems = totals.totalItems;
       state.totalAmount = totals.totalAmount;
-
-      storage.setCart(state.items);
+    
+      // Save to storage
+      storage.setCart(newItems);
     },
+    
 
     updateQuantity: (state, action: PayloadAction<{
       menuItemId: string;
@@ -155,7 +158,7 @@ const cartSlice = createSlice({
       }
     },
 
-    decrementQuantity: (state, action: PayloadAction<{
+    decrementCartItem: (state, action: PayloadAction<{
       menuItemId: string;
       customizations?: any;
     }>) => {
@@ -235,7 +238,7 @@ const cartSlice = createSlice({
       const { items } = action.payload;
 
       items.forEach(({ menuItem, quantity, customizations }) => {
-        const existingItemIndex = findCartItem(state.items, menuItem.id, customizations);
+        const existingItemIndex = findCartItem(state.items, menuItem.itemId, customizations);
 
         if (existingItemIndex >= 0) {
           const existingItem = state.items[existingItemIndex];
@@ -286,7 +289,7 @@ export const {
   updateQuantity,
   removeFromCart,
   incrementQuantity,
-  decrementQuantity,
+  decrementCartItem,
   clearCart,
   applyPromoCode,
   removePromoCode,

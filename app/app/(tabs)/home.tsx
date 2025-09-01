@@ -1,5 +1,4 @@
-// app/(tabs)/home.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
@@ -25,6 +24,15 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Create a memoized quantity map for efficient lookups
+  const cartQuantityMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    cartItems.forEach(item => {
+      map[item.menuItem.itemId] = item.quantity;
+    });
+    return map;
+  }, [cartItems]);
+
   useEffect(() => {
     loadProducts();
   }, []);
@@ -37,8 +45,24 @@ export default function HomeScreen() {
     try {
       setIsLoading(true);
       const response = await api.getMenu();
+      
       if (response.success && response.data) {
         setProducts(response.data);
+      } else {
+        // Fallback: try direct fetch
+        try {
+          const fallbackResponse = await fetch('http://localhost:8080/menu');
+          const fallbackData = await fallbackResponse.json();
+          
+          if (fallbackResponse.ok) {
+            const menuItems = fallbackData.menu || fallbackData;
+            if (Array.isArray(menuItems)) {
+              setProducts(menuItems);
+            }
+          }
+        } catch (fallbackError) {
+          console.error('Fallback menu load failed:', fallbackError);
+        }
       }
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -54,7 +78,6 @@ export default function HomeScreen() {
     // Filter by category
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(product => {
-        // Handle both string category and MenuCategory object
         const category = typeof product.category === 'string' 
           ? product.category 
           : product.category.name;
@@ -90,11 +113,10 @@ export default function HomeScreen() {
   };
 
   const handleProductPress = (product: MenuItem) => {
-    router.push(`/product/${product.id}`);
+    router.push(`/product/${product.itemId}`);
   };
 
   const handleAddToCart = (product: MenuItem) => {
-    // Actually add to cart instead of redirecting
     dispatch(addToCart({
       menuItem: product,
       quantity: 1,
@@ -103,16 +125,6 @@ export default function HomeScreen() {
         extras: []
       }
     }));
-    
-    // Optional: Show a toast or confirmation message
-    console.log('Added to cart:', product.name);
-  };
-
-  const getCartQuantity = (product: MenuItem) => {
-    const cartItem = cartItems.find(item => 
-      item.menuItem.id === product.id
-    );
-    return cartItem ? cartItem.quantity : 0;
   };
 
   const handleRefresh = () => {
@@ -166,7 +178,7 @@ export default function HomeScreen() {
           products={filteredProducts}
           onProductPress={handleProductPress}
           onAddToCart={handleAddToCart}
-          cartItems={cartItems}
+          cartQuantityMap={cartQuantityMap}
           loading={isLoading}
         />
 
